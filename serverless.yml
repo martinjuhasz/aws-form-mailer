@@ -1,0 +1,64 @@
+service: form-submissions-juhaszio
+
+custom:
+  mailReceiver: martin@juhasz.io
+  mailSender: info@martinjuhasz.de
+  awsRegion: eu-central-1
+  tableName: "form-submissions-juhaszio-${self:provider.stage}"
+  webpack:
+    webpackConfig: "webpack.config.js"
+    includeModules: true
+    packager: "yarn"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ${self:custom.awsRegion}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - ses:SendEmail
+      Resource:
+        - { "Fn::GetAtt": ["ContactTable", "Arn"] }
+        - "arn:aws:ses:${self:custom.awsRegion}:*:*"
+
+package:
+  individually: true
+
+plugins:
+  - serverless-webpack
+
+functions:
+  index:
+    handler: src/index.handler
+    events:
+      - http:
+          path: contact
+          method: post
+          cors: true
+    environment:
+      DYNAMODB_TABLE_NAME: ${self:custom.tableName}
+      MAIL_RECEIVER: ${self:custom.mailReceiver}
+      MAIL_SENDER: ${self:custom.mailSender}
+      SES_REGION: ${self:custom.awsRegion}
+
+resources:
+  Resources:
+    ContactTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
