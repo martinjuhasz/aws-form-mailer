@@ -1,0 +1,26 @@
+{
+  "name": "aws-form-mailer",
+  "version": "0.0.1",
+  "description": "Lambda function for a simple website form api that sends emails and stores requests in dynamo db",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "sls deploy --stage dev",
+    "deploy:production": "sls deploy --stage prod",
+    "remove": "sls remove --stage dev",
+    "remove:production": "sls remove --stage prod"
+  },
+  "author": "Martin Juhasz",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb-node": "^0.1.0-preview.9",
+    "@aws-sdk/client-ses-node": "^0.1.0-preview.6",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.5",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.4",
+    "prettier": "^1.19.1",
+    "serverless-webpack": "^5.3.1"
+  }
+}
